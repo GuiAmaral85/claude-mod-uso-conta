@@ -50,11 +50,15 @@ test('pessoal: limite da sessão de 5h', async ($, on) => {
     ],
     cost: { usd: 1 },
   } }) as any)
-  on('session.measure', (_$, e) => ({ changed: e.changed }) as any)
-  await $.session.measure({ rateLimits: [], changed: ['rateLimits'] } as any)
+  on('turn.complete', () => ({ text: '' }) as any)
+  await $.turn.complete({
+    answer: '',
+    usage: { model: 'x', input_tokens: 1000, output_tokens: 500, cache_read_input_tokens: 0, cache_creation_input_tokens: 0 },
+  } as any)
   for (const surface of SURFACES) {
     const ui = await $.ui.mount({ ...BAND, surface })
     expect(await ui.find({ type: 'Text', text: /Sessão \(5h\)/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /1,5 mil tokens nesta conversa/ })).toBeDefined()
     expect(await ui.find({ type: 'Text', text: /reinicia 15:30/ })).toBeDefined()
     await ui.unmount()
   }

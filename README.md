@@ -5,7 +5,7 @@ Mod do Claude Code que mostra, numa faixa logo acima do campo de texto, quanto v
 - **Sempre:** o custo da conversa atual em US$ e quantos tokens ela já usou.
   Ex.: `Esta conversa US$ 0,42 · 12,5 mil tokens`
 - **Quando a conta informa o limite ao Claude Code:**
-  - Conta pessoal (Pro/Max): a barrinha do limite da sessão de 5h, com a hora em que reinicia, e o uso semanal.
+  - Conta pessoal (Pro/Max): a barrinha do limite da sessão de 5h, com a hora em que reinicia e os tokens da conversa, e o uso semanal.
   - Conta com limite de gastos: a barrinha em US$ (ex.: `~US$ 33,00 de US$ 300,00 · 11% usado`) e a data em que reinicia.
 
 > Contas Enterprise que não informam o limite ao Claude Code mostram só o custo da conversa.

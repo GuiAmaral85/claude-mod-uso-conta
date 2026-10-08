@@ -162,6 +162,7 @@ export const register: Register = (on, options) => {
             {bar(session.percentUsed)}
             <Text> {Math.round(session.percentUsed)}% usado</Text>
             {session.resetsAt ? <Text dimColor> · reinicia {formatTime(session.resetsAt)}</Text> : null}
+            <Text dimColor> · {formatTokens(tokenCount)} tokens nesta conversa</Text>
           </Box>
         ) : null}
         {week ? (
