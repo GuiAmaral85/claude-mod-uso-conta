@@ -1,0 +1,15 @@
+{
+  "name": "uso-conta",
+  "version": "0.3.0",
+  "description": "Faixa acima do campo de texto com o consumo: custo da conversa em US$ e tokens, ou o limite da conta quando ela informa",
+  "author": { "name": "Guilherme Amaral" },
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "spendCapUsd": {
+      "type": "number",
+      "title": "Teto de gastos (US$)",
+      "description": "Limite mensal de gastos da sua conta, usado para converter a % em dólares quando a conta informa o limite",
+      "default": 300
+    }
+  }
+}

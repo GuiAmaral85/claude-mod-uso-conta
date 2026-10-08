@@ -1,0 +1,5 @@
+{
+  "name": "uso-conta",
+  "owner": { "name": "Guilherme Amaral" },
+  "plugins": [{ "name": "uso-conta", "source": "./" }]
+}
