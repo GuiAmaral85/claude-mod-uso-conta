@@ -60,8 +60,24 @@ test('pessoal: limite da sessão de 5h', async ($, on) => {
     expect(await ui.find({ type: 'Text', text: /Sessão \(5h\)/ })).toBeDefined()
     expect(await ui.find({ type: 'Text', text: /1,5 mil tokens nesta conversa/ })).toBeDefined()
     expect(await ui.find({ type: 'Text', text: /reinicia 15:30/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /Semanal/ })).toBeDefined()
     await ui.unmount()
   }
+})
+
+test('pessoal: painel estreito encolhe a barra sem quebrar a linha', async ($, on) => {
+  on('session.usage', () => ({ value: {
+    startedAt: 0,
+    context: {} as any,
+    rateLimits: [{ kind: 'five_hour', percentUsed: 2, resetsAt: '2026-10-08T18:30:00Z' }],
+    cost: { usd: 0 },
+  } }) as any)
+  on('session.measure', (_$, e) => ({ changed: e.changed }) as any)
+  await $.session.measure({ rateLimits: [], changed: ['rateLimits'] } as any)
+  const ui = await $.ui.mount({ ...BAND, surface: 'desktop', props: { ...BAND.props, bodyColumns: 45 } })
+  expect(await ui.find({ type: 'Text', text: /Sessão \(5h\)/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /2%/ })).toBeDefined()
+  await ui.unmount()
 })
 
 test('sem limites: mostra custo da conversa', async ($, on) => {

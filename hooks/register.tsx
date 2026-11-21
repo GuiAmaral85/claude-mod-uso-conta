@@ -5,7 +5,9 @@ import type { Usage } from '../types'
 
 // Teto padrão do limite de gastos, em US$ (a API só informa a %); configurável.
 const DEFAULT_SPEND_CAP_USD = 300
-const BAR_CELLS = 24
+const BAR_CELLS = 20
+const MIN_BAR_CELLS = 10
+const LABEL_WIDTH = 12
 const BLUE = '#2F80ED'
 const TRACK = '#C9DFF7'
 
@@ -51,8 +53,8 @@ function barColor(percent: number): string {
   return BLUE
 }
 
-function cells(percent: number): number {
-  const filled = Math.round((Math.min(percent, 100) / 100) * BAR_CELLS)
+function cells(percent: number, total: number): number {
+  const filled = Math.round((Math.min(percent, 100) / 100) * total)
   return percent > 0 ? Math.max(filled, 1) : 0
 }
 
@@ -105,15 +107,30 @@ export const register: Register = (on, options) => {
     const current = await read($, usage)
     const tokenCount = await read($, tokens)
 
+    // A barra encolhe em painéis estreitos (ex.: aba Code do app) para cada
+    // linha caber inteira, sem quebrar o texto em colunas espremidas.
+    const barCells = Math.max(MIN_BAR_CELLS, Math.min(BAR_CELLS, (e.props.bodyColumns ?? 80) - 40))
+
     const bar = (percent: number) => {
-      const filled = cells(percent)
+      const filled = cells(percent, barCells)
       return (
         <Text>
-          <Text color={barColor(percent)}>{'█'.repeat(filled)}</Text>
-          <Text color={TRACK}>{'█'.repeat(BAR_CELLS - filled)}</Text>
+          <Text color={barColor(percent)}>{'━'.repeat(filled)}</Text>
+          <Text color={TRACK}>{'━'.repeat(barCells - filled)}</Text>
         </Text>
       )
     }
+
+    // Uma linha = um único Text: o conjunto quebra como texto corrido, e as
+    // barras de Sessão e Semanal ficam alinhadas pelo rótulo de largura fixa.
+    const limitRow = (label: string, limit: SessionRateLimit, reset: string | null) => (
+      <Text>
+        <Text bold>{label.padEnd(LABEL_WIDTH)}</Text>
+        {bar(limit.percentUsed)}
+        <Text bold color={barColor(limit.percentUsed)}> {`${Math.round(limit.percentUsed)}%`.padStart(4)}</Text>
+        {reset ? <Text dimColor> · reinicia {reset}</Text> : null}
+      </Text>
+    )
 
     if (current === null) {
       return (
@@ -129,15 +146,15 @@ export const register: Register = (on, options) => {
       const usd = (spend.percentUsed / 100) * spendCapUsd
       return (
         <Box flexDirection="column">
-          <Box>
-            <Text bold>Enterprise </Text>
-            <Text>~US$ {formatUsd(usd)} de US$ {formatUsd(spendCapUsd)} </Text>
+          <Text>
+            <Text bold>{'Gastos'.padEnd(LABEL_WIDTH)}</Text>
             {bar(spend.percentUsed)}
-            <Text> {Math.round(spend.percentUsed)}% usado</Text>
-          </Box>
-          {spend.resetsAt ? (
-            <Text dimColor>Limite de gastos · Reinicia {formatDay(spend.resetsAt)} BRT</Text>
-          ) : null}
+            <Text bold color={barColor(spend.percentUsed)}> {`${Math.round(spend.percentUsed)}%`.padStart(4)}</Text>
+          </Text>
+          <Text dimColor>
+            ~US$ {formatUsd(usd)} de US$ {formatUsd(spendCapUsd)}
+            {spend.resetsAt ? ` · reinicia ${formatDay(spend.resetsAt)} (BRT)` : ''}
+          </Text>
         </Box>
       )
     }
@@ -147,30 +164,20 @@ export const register: Register = (on, options) => {
     if (!session && !week) {
       return (
         <Box>
-          <Text bold>Esta conversa </Text>
-          <Text>US$ {formatUsd(current.costUsd ?? 0)}</Text>
-          <Text dimColor> · {formatTokens(tokenCount)} tokens</Text>
+          <Text>
+            <Text bold>Esta conversa </Text>
+            <Text>US$ {formatUsd(current.costUsd ?? 0)}</Text>
+            <Text dimColor> · {formatTokens(tokenCount)} tokens</Text>
+          </Text>
         </Box>
       )
     }
 
     return (
       <Box flexDirection="column">
-        {session ? (
-          <Box>
-            <Text bold>Sessão (5h) </Text>
-            {bar(session.percentUsed)}
-            <Text> {Math.round(session.percentUsed)}% usado</Text>
-            {session.resetsAt ? <Text dimColor> · reinicia {formatTime(session.resetsAt)}</Text> : null}
-            <Text dimColor> · {formatTokens(tokenCount)} tokens nesta conversa</Text>
-          </Box>
-        ) : null}
-        {week ? (
-          <Text dimColor>
-            Semanal: {Math.round(week.percentUsed)}% usado
-            {week.resetsAt ? ` · reinicia ${formatDay(week.resetsAt)}` : ''}
-          </Text>
-        ) : null}
+        {session ? limitRow('Sessão (5h)', session, session.resetsAt ? formatTime(session.resetsAt) : null) : null}
+        {week ? limitRow('Semanal', week, week.resetsAt ? formatDay(week.resetsAt) : null) : null}
+        <Text dimColor>{formatTokens(tokenCount)} tokens nesta conversa</Text>
       </Box>
     )
   })

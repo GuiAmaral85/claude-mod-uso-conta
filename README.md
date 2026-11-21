@@ -5,8 +5,14 @@ Mod do Claude Code que mostra, numa faixa logo acima do campo de texto, quanto v
 - **Sempre:** o custo da conversa atual em US$ e quantos tokens ela já usou.
   Ex.: `Esta conversa US$ 0,42 · 12,5 mil tokens`
 - **Quando a conta informa o limite ao Claude Code:**
-  - Conta pessoal (Pro/Max): a barrinha do limite da sessão de 5h, com a hora em que reinicia e os tokens da conversa, e o uso semanal.
-  - Conta com limite de gastos: a barrinha em US$ (ex.: `~US$ 33,00 de US$ 300,00 · 11% usado`) e a data em que reinicia.
+  - Conta pessoal (Pro/Max): uma barra para a sessão de 5h e outra para o uso semanal, alinhadas, cada uma com a hora em que reinicia; abaixo, os tokens da conversa.
+    ```
+    Sessão (5h) ━━━━━━━━━━━━━━━━━━━━  42% · reinicia 15:30
+    Semanal     ━━━━━━━━━━━━━━━━━━━━   7% · reinicia sex., 27 de nov., 05:00
+    1,5 mil tokens nesta conversa
+    ```
+  - Conta com limite de gastos: a barra com a % usada e, abaixo, o valor em US$ (ex.: `~US$ 33,00 de US$ 300,00`) e a data em que reinicia.
+- A barra encolhe em painéis estreitos (como a aba Code do app Claude), para cada linha caber inteira.
 
 > Contas Enterprise que não informam o limite ao Claude Code mostram só o custo da conversa.
 > O total do mês continua disponível em claude.ai → Configurações → Uso.
